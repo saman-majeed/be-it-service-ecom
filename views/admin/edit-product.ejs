@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>
+        <%= editing ? 'Edit Product' : 'Add Product' %> | Admin
+    </title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <style>
+        .seo-box {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            border-left: 4px solid #2ecc71;
+            margin-top: 20px;
+        }
+
+        .seo-box h3 {
+            margin-top: 0;
+            color: #27ae60;
+            font-size: 1.1rem;
+        }
+
+        .help-text {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="admin-sidebar">
+        <h2>Admin Panel</h2>
+        <a href="/admin">Products</a>
+        <a href="/admin/orders">Orders</a>
+        <a href="/">Visit Website</a>
+    </div>
+
+    <div class="admin-content">
+        <a href="/admin" class="btn-admin btn-back" style="text-decoration: none; color: #666;">&larr; Back to
+            Dashboard</a>
+
+        <h1>
+            <%= editing ? 'Edit Product' : 'Add New Product' %>
+        </h1>
+
+        <form action="/admin/product/<%= editing ? 'edit/' + product._id : 'new' %>" method="POST">
+
+            <div class="form-group">
+                <label>Product Name</label>
+                <input type="text" name="name" class="form-control" value="<%= editing ? product.name : '' %>" required>
+            </div>
+
+            <div class="form-group">
+                <label>Category</label>
+                <select name="category" class="form-control">
+                    <option value="Software" <%=(editing && product.category==='Software' ) ? 'selected' : '' %>
+                        >Software</option>
+                    <option value="Hardware" <%=(editing && product.category==='Hardware' ) ? 'selected' : '' %>
+                        >Hardware</option>
+                    <option value="Service" <%=(editing && product.category==='Service' ) ? 'selected' : '' %>>Service
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Price ($)</label>
+                <input type="number" name="price" class="form-control" value="<%= editing ? product.price : '' %>"
+                    required>
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <textarea name="description" class="form-control" rows="4"
+                    required><%= editing ? product.description : '' %></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Icon Class (FontAwesome)</label>
+                <input type="text" name="iconClass" class="form-control" placeholder="e.g. fa-solid fa-laptop"
+                    value="<%= editing ? product.iconClass : '' %>">
+            </div>
+
+            <div class="seo-box">
+                <h3>SEO & Meta Details</h3>
+
+                <div class="form-group">
+                    <label>Meta Title</label>
+                    <span class="help-text">This appears as the clickable link in Google search results.</span>
+                    <input type="text" name="metaTitle" class="form-control"
+                        placeholder="e.g. Professional Laptop Repair | Be IT:Service"
+                        value="<%= editing ? product.metaTitle : '' %>">
+                </div>
+
+                <div class="form-group">
+                    <label>Meta Description</label>
+                    <span class="help-text">A brief summary for search engine snippets (150-160 chars).</span>
+                    <textarea name="metaDescription" class="form-control" rows="2"
+                        placeholder="Describe your service..."><%= editing ? product.metaDescription : '' %></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Keywords</label>
+                    <span class="help-text">Comma-separated values for indexing.</span>
+                    <input type="text" name="keywords" class="form-control" placeholder="e.g. hardware, repair, screen"
+                        value="<%= editing ? product.keywords : '' %>">
+                </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <button type="submit" class="btn-admin btn-create"
+                    style="padding: 10px 20px; cursor: pointer; background: #4cb050; color: white; border: none; border-radius: 4px;">
+                    <%= editing ? 'Update Product' : 'Create Product' %>
+                </button>
+            </div>
+        </form>
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,138 @@
+:root {
+    --green: #4cb050;
+    --green-dark: #2e8f3a;
+    --text: #1e1f21;
+    --muted: #7a7f85;
+    --border: #e8eaed;
+    --bg: #f7f9fb;
+    --white: #fff;
+}
+
+/* GENERAL STYLES */
+body {
+    background: var(--bg);
+    font-family: 'Open Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    font-family: Montserrat, sans-serif;
+    color: var(--text);
+}
+
+/* NAVBAR STYLES */
+.navbar {
+    background: var(--text);
+    padding: 0.5rem 0;
+}
+
+.navbar-brand {
+    font-family: Montserrat, sans-serif;
+    font-weight: 700;
+    color: var(--green) !important;
+    font-size: 1.6rem;
+    letter-spacing: 0.5px;
+}
+
+.navbar-brand .bubble {
+    width: 32px;
+    height: 32px;
+    background: var(--green);
+    color: #fff;
+    border-radius: 50%;
+    display: grid;
+    place-content: center;
+    font-family: Montserrat, sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    margin-right: 5px;
+}
+
+.navbar-nav .nav-link {
+    color: #fff !important;
+    margin-left: 15px;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--green) !important;
+}
+
+/* CHECKOUT BOX */
+.checkout-box {
+    background: var(--white);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+    margin: 40px auto;
+    max-width: 900px;
+    width: 100%;
+    flex: 1;
+    border: 1px solid var(--border);
+}
+
+h3.section-title {
+    border-left: 5px solid var(--green);
+    padding-left: 12px;
+    margin-bottom: 25px;
+    color: var(--green-dark);
+    font-weight: 600;
+    font-family: Montserrat, sans-serif;
+}
+
+/* LIST/TABLE STYLES */
+.product-img {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+    margin-right: 15px;
+    border: 1px solid var(--border);
+}
+
+.list-group-item {
+    font-size: 1rem;
+    background: var(--bg);
+}
+
+/* BUTTON STYLES */
+.btn-theme {
+    background: var(--green);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.btn-theme:hover {
+    background: var(--green-dark);
+    color: #fff;
+}
+
+/* MODAL STYLES */
+.modal-content {
+    border-radius: 15px;
+}
+
+.modal-header {
+    background: var(--green);
+    color: #fff;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+.alert-theme {
+    background: #fff3cd;
+    border: 1px solid #ffeeba;
+    color: #856404;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}

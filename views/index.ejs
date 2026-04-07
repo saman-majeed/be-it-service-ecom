@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include('partials/head') %>
+        <title>Be IT:Service — Repair & Boost Your Computer</title>
+        <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+    <header class="site" id="top">
+        <div class="bar">
+            <div class="container nav">
+                <a href="#top" class="brand" aria-label="Be IT Service">
+                    <span class="bubble">Be</span>
+                    <span class="name">IT:<b>SERVICE</b></span>
+                </a>
+                <nav>
+                    <ul>
+                        <li><a href="#start" class="active">Start</a></li>
+                        <li><a href="#repair">What we repair?</a></li>
+                        <li><a href="#offer">Offer</a></li>
+                        <li><a href="#testimonials">Testimonials</a></li>
+                        <li><a href="#why">Why choose us?</a></li>
+                    </ul>
+                </nav>
+                <div class="nav-cta" style="display: flex; align-items: center; gap: 10px;">
+                    <% if (user) { %>
+                        <span style="font-size: 14px; color: #666;">Hi, <b>
+                                <%= user.name %>
+                            </b></span>
+                        <a href="/logout" class="btn btn-ghost" style="color: #ff4d4d;">Logout</a>
+                        <% } else { %>
+                            <a href="/login" class="btn btn-ghost">Login</a>
+                            <a href="/signup" class="btn btn-primary" style="background: #333;">Sign up</a>
+                            <% } %>
+
+                                <!-- <a href="/my-orders" class="btn btn-ghost">
+                                    <i class="fa-solid fa-clock-rotate-left"></i> Track Orders
+                                </a>-->
+
+                                <!--<a href="/checkout" class="btn btn-ghost">Buy now</a>
+                                <a href="#contact" class="btn btn-primary">Hire us!</a>
+
+                                <% if (user && user.role==='admin' ) { %>
+                                    <a href="/admin" class="btn btn-ghost"
+                                        style="border-color: #333; color: #333; white-space: nowrap;">Admin</a>
+                                    <% } %>-->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero" id="start">
+        <div class="content container">
+            <h1>Want to repair<br />or boost your computer?</h1>
+            <p class="lead">Version proin gravida nibh vel velit auctor aliquet. Aenean sollicitudin, lorem quis
+                bibendum. This layout mirrors the style you shared and is built with clean, responsive HTML & CSS only.
+            </p>
+            <a href="#offer" class="btn btn-primary"><i class="fa-solid fa-tag"></i> SEE OFFER</a>
+        </div>
+        <div class="hero-badge">Be</div>
+    </section>
+
+    <section class="banner-wrap" id="repair">
+        <div class="container banner">
+            <h2>We are able to deal with any electronic device</h2>
+            <p>Nullam viverra consectetur. Quisque cursus et porttitor risus. Aliquam sem. In hendrerit nulla, accumsan
+                congue.</p>
+            <div class="laptop">
+                <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=1600&auto=format&fit=crop"
+                    alt="Laptop top-down" />
+            </div>
+        </div>
+    </section>
+
+    <section id="offer">
+        <div class="container">
+            <div class="section-hd">
+                <div class="center"><i class="fa-solid fa-angles-down" style="color:var(--green);"></i></div>
+                <h2>See what we can do with your device!</h2>
+
+                <div class="center"
+                    style="margin-top: 20px; margin-bottom: 20px; display: flex; justify-content: center; gap: 10px;">
+                    <a href="/" class="btn btn-ghost <%= category === '' ? 'btn-primary' : '' %>"
+                        style="padding: 8px 18px; border-radius: 20px;">All</a>
+                    <a href="/?category=Software"
+                        class="btn btn-ghost <%= category === 'Software' ? 'btn-primary' : '' %>"
+                        style="padding: 8px 18px; border-radius: 20px;">Software</a>
+                    <a href="/?category=Hardware"
+                        class="btn btn-ghost <%= category === 'Hardware' ? 'btn-primary' : '' %>"
+                        style="padding: 8px 18px; border-radius: 20px;">Hardware</a>
+                    <a href="/?category=Service"
+                        class="btn btn-ghost <%= category === 'Service' ? 'btn-primary' : '' %>"
+                        style="padding: 8px 18px; border-radius: 20px;">Service</a>
+                </div>
+            </div>
+
+            <div class="cards">
+                <% if (products.length> 0) { %>
+                    <% products.forEach(product=> { %>
+                        <a href="/product/<%= product._id %>" style="display: block; height: 100%;">
+                            <article class="card" style="height: 100%; display: flex; flex-direction: column;">
+                                <div class="pin"><i class="<%= product.iconClass %>"></i></div>
+                                <h3>
+                                    <%= product.name %>
+                                </h3>
+                                <p style="flex-grow: 1;">
+                                    <%= product.description %>
+                                </p>
+                                <p style="font-weight: 700; color: var(--green); margin-top: auto;">Start from $<%=
+                                        product.price %>
+                                </p>
+                                <div class="tag" style="margin-top: 10px;">
+                                    <%= product.category %>
+                                </div>
+                            </article>
+                        </a>
+                        <% }) %>
+                            <% } else { %>
+                                <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
+                                    <p class="muted">No services found in this category.</p>
+                                    <a href="/" class="btn btn-ghost">Clear Filters</a>
+                                </div>
+                                <% } %>
+            </div>
+
+            <div class="center"
+                style="margin-top: 50px; display: flex; justify-content: center; gap: 10px; align-items: center;">
+                <% if (currentPage> 1) { %>
+                    <a href="/?page=<%= currentPage - 1 %><%= category ? '&category=' + category : '' %>#offer"
+                        class="btn btn-ghost">
+                        &laquo; Prev
+                    </a>
+                    <% } %>
+
+                        <span style="font-weight: 600; color: var(--muted); padding: 0 10px;">
+                            Page <%= currentPage %> of <%= totalPages %>
+                        </span>
+
+                        <% if (currentPage < totalPages) { %>
+                            <a href="/?page=<%= currentPage + 1 %><%= category ? '&category=' + category : '' %>#offer"
+                                class="btn btn-ghost">
+                                Next &raquo;
+                            </a>
+                            <% } %>
+            </div>
+        </div>
+    </section>
+
+    <section class="testimonials" id="testimonials">
+        <div class="container">
+            <div class="quote">“Lorem quis bibendum auctor, nisi elit consequat ipsum sagittis sem nibh id elit. Duis
+                sed odio sit amet nibh vulputate cursus a sit amet mauris. Morbi accumsan.”</div>
+            <div class="author">— Mark Jefferson</div>
+        </div>
+    </section>
+
+    <section class="why" id="why">
+        <div class="container grid">
+            <div>
+                <h2>3 main reasons explaining<br />why to choose us</h2>
+                <div class="reasons">
+                    <div class="reason">
+                        <div class="pin"><i class="fa-solid fa-percent"></i></div>
+                        <h4>The best price</h4>
+                        <p>Vestibulum commodo volutpat a, convallis ac, laoreet enim. Phasellus fermentum in.</p>
+                    </div>
+                    <div class="reason">
+                        <div class="pin"><i class="fa-solid fa-headset"></i></div>
+                        <h4>Great support</h4>
+                        <p>Ut molestie a, ultricies porta urna vestibulum commodo volutpat a convallis.</p>
+                    </div>
+                    <div class="reason">
+                        <div class="pin"><i class="fa-solid fa-stopwatch"></i></div>
+                        <h4>Fast 4 days repair</h4>
+                        <p>Integer aliquam purus quisque lorem tortor fringilla sed.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="macbook">
+                <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=1600&auto=format&fit=crop"
+                    alt="Macbook" />
+            </div>
+        </div>
+    </section>
+
+    <section class="callout" id="contact">
+        <div class="container">
+            <h2>Send your device now and receive it back within 4 days! <sup>*</sup></h2>
+            <p class="muted">* Nulla imperdiet sit amet magna vestibulum dapibus, mauris nec malesuada fames</p>
+
+            <div class="cols-3">
+                <div class="well">
+                    <h3>About us</h3>
+                    <p>Etiam ullamcorper. Suspendisse a pellentesque dui, non felis. Maecenas malesuada elit lectus
+                        felis, malesuada ultricies. Curabitur et ligula. Ut molestie a.</p>
+                    <p>Vestibulum dapibus, mauris nec malesuada fames ac turpis velit, rhoncus eu, luctus et interdum
+                        adipiscing wisi. Aliquam erat ac ipsum.</p>
+                </div>
+
+                <div class="well">
+                    <h3>Shipping information</h3>
+                    <p>Ultricies porta urna. Vestibulum commodo volutpat a, convallis ac, laoreet enim. Pellentesque
+                        facilisis. Nulla imperdiet sit amet.</p>
+                    <p>Integer aliquam purus. Vestibulum dapibus, mauris nec malesuada fames ac turpis velit, rhoncus
+                        eu, luctus et interdum adipiscing wisi.</p>
+                </div>
+
+                <div class="well">
+                    <h3>Send us a message</h3>
+
+                    <div id="success-msg"
+                        style="display:none; background: #d4edda; color: #155724; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #c3e6cb; font-weight: 600;">
+                        ✅ Thanks! We received your message.
+                    </div>
+
+                    <form class="contact" action="/contact" method="POST">
+                        <input class="input" type="text" name="name" placeholder="Your name" required>
+                        <input class="input" type="email" name="email" placeholder="Your e‑mail" required>
+                        <textarea class="input" name="message" placeholder="Message" required></textarea>
+                        <button class="btn btn-primary" type="submit">Hire us</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="customer-testimonials" id="customer-testimonials">
+        <div class="container">
+            <div class="section-hd">
+                <h2>Customer Testimonials</h2>
+                <p class="muted">See what our happy clients say about our service</p>
+            </div>
+
+            <div class="testimonials-grid">
+                <div class="t-card">
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="John Doe" class="t-img">
+                    <h4>John Doe</h4>
+                    <div class="stars">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <i class="fa-regular fa-star"></i>
+                    </div>
+                    <p>"They fixed my laptop within two days and it runs faster than ever! Highly recommended."</p>
+                </div>
+
+                <div class="t-card">
+                    <img src="https://randomuser.me/api/portraits/women/45.jpg" alt="Sarah Smith" class="t-img">
+                    <h4>Sarah Smith</h4>
+                    <div class="stars">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <p>"Amazing customer support and quick turnaround. My PC feels brand new!"</p>
+                </div>
+
+                <div class="t-card hidden">
+                    <img src="https://randomuser.me/api/portraits/men/78.jpg" alt="David Wilson" class="t-img">
+                    <h4>David Wilson</h4>
+                    <div class="stars">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>
+                        <i class="fa-regular fa-star"></i>
+                    </div>
+                    <p>"Professional service with fair pricing. Will definitely come back for future repairs."</p>
+                </div>
+
+                <div class="t-card hidden">
+                    <img src="https://randomuser.me/api/portraits/women/67.jpg" alt="Emily Johnson" class="t-img">
+                    <h4>Emily Johnson</h4>
+                    <div class="stars">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <i class="fa-regular fa-star"></i>
+                    </div>
+                    <p>"The team was super friendly and efficient. My computer has never run this smoothly!"</p>
+                </div>
+
+                <div class="t-card hidden">
+                    <img src="https://randomuser.me/api/portraits/men/52.jpg" alt="Michael Brown" class="t-img">
+                    <h4>Michael Brown</h4>
+                    <div class="stars">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <p>"Best IT service I've used! They recovered all my data from a crashed hard drive. Lifesavers!"
+                    </p>
+                </div>
+
+                <div class="t-card hidden">
+                    <img src="https://randomuser.me/api/portraits/women/28.jpg" alt="Lisa Anderson" class="t-img">
+                    <h4>Lisa Anderson</h4>
+                    <div class="stars">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <p>"Very professional team. They upgraded my RAM and now my computer handles multitasking
+                        perfectly."</p>
+                </div>
+
+                <div class="t-card hidden">
+                    <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="Robert Martinez" class="t-img">
+                    <h4>Robert Martinez</h4>
+                    <div class="stars">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <i class="fa-regular fa-star"></i>
+                    </div>
+                    <p>"Great experience from start to finish. Clear communication and honest pricing."</p>
+                </div>
+
+                <div class="t-card hidden">
+                    <img src="https://randomuser.me/api/portraits/women/55.jpg" alt="Jennifer Taylor" class="t-img">
+                    <h4>Jennifer Taylor</h4>
+                    <div class="stars">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <p>"Fixed my gaming PC and optimized it for performance. Runs like a dream now!"</p>
+                </div>
+
+                <div class="t-card hidden">
+                    <img src="https://randomuser.me/api/portraits/men/67.jpg" alt="James Wilson" class="t-img">
+                    <h4>James Wilson</h4>
+                    <div class="stars">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star-half-stroke"></i>
+                    </div>
+                    <p>"Excellent hardware repair service. They replaced my screen and keyboard quickly and affordably."
+                    </p>
+                </div>
+
+                <div class="t-card hidden">
+                    <img src="https://randomuser.me/api/portraits/women/33.jpg" alt="Amanda Clark" class="t-img">
+                    <h4>Amanda Clark</h4>
+                    <div class="stars">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <p>"They helped me choose the right upgrades for my budget. Very knowledgeable and helpful!"</p>
+                </div>
+            </div>
+
+            <div class="center" style="margin-top: 30px;">
+                <button class="btn btn-primary" id="viewMoreBtn">
+                    <span>View More</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <div class="cta-bar" id="buy">
+        <div class="container row">
+            <h3>Call for help now!&nbsp; +23 120 230 340</h3>
+            <a href="#contact" class="btn">Contact us</a>
+        </div>
+    </div>
+
+    <div class="chat-widget"
+        style="position: fixed !important; bottom: 30px !important; right: 30px !important; z-index: 1000000 !important;">
+        <div id="chat-window" style="display: none; flex-direction: column;">
+            <div class="chat-header">
+                <span>AI Support Agent</span>
+                <i class="fa-solid fa-times" onclick="toggleChat()" style="cursor:pointer"></i>
+            </div>
+            <div class="chat-body" id="chat-body">
+                <div class="msg bot-msg">Hello! I'm your AI assistant. How can I help you today? You can ask about
+                    services, tracking, or pricing.</div>
+            </div>
+            <div class="chat-footer">
+                <input type="text" id="chat-input" placeholder="Type your message here...">
+            </div>
+        </div>
+        <button id="chat-button" onclick="toggleChat()"
+            style="display: flex !important; align-items: center; justify-content: center; width: 65px; height: 65px; border-radius: 50%; background: #4cb050; color: white; border: none; cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.4);">
+            <i class="fa-solid fa-robot" style="font-size: 28px;"></i>
+        </button>
+    </div>
+
+    <%- include('partials/footer') %>
+
+        <script>
+            // Header Scroll Logic
+            const header = document.querySelector('header.site');
+            const links = [...document.querySelectorAll('nav a')];
+            const sections = links.map(a => {
+                const id = a.getAttribute('href');
+                return id.startsWith('#') ? document.querySelector(id) : null;
+            }).filter(Boolean);
+
+            const setActive = () => {
+                const y = window.scrollY + 90;
+                sections.forEach((sec, i) => {
+                    if (sec.offsetTop <= y && (sec.offsetTop + sec.offsetHeight) > y) {
+                        links.forEach(l => l.classList.remove('active'));
+                        links[i].classList.add('active');
+                    }
+                });
+                header.classList.toggle('is-scrolled', window.scrollY > 10);
+            };
+            setActive();
+            window.addEventListener('scroll', setActive, { passive: true });
+
+            // Customer Testimonials "View More" Logic
+            const viewMoreBtn = document.getElementById('viewMoreBtn');
+            const hiddenCards = document.querySelectorAll('.t-card.hidden');
+            const btnText = viewMoreBtn.querySelector('span');
+            let expanded = false;
+
+            viewMoreBtn.addEventListener('click', () => {
+                expanded = !expanded;
+
+                if (expanded) {
+                    hiddenCards.forEach((card, index) => {
+                        setTimeout(() => {
+                            card.style.display = 'block';
+                            card.classList.remove('hidden');
+                            card.classList.add('fade-in');
+                        }, index * 100);
+                    });
+
+                    btnText.textContent = 'View Less';
+                    viewMoreBtn.classList.add('expanded');
+                } else {
+                    hiddenCards.forEach(card => {
+                        card.classList.remove('fade-in');
+                        card.classList.add('hidden');
+                        card.style.display = 'none';
+                    });
+
+                    btnText.textContent = 'View More';
+                    viewMoreBtn.classList.remove('expanded');
+
+                    document.querySelector('.customer-testimonials').scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }
+            });
+
+            // UPDATED: Success Message Logic
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('message_sent') === 'true') {
+                const msgBox = document.getElementById('success-msg');
+                if (msgBox) {
+                    msgBox.style.display = 'block';
+                    document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
+                }
+                window.history.replaceState(null, null, window.location.pathname);
+            }
+
+            // --- AI CHATBOT LOGIC ---
+            function toggleChat() {
+                const win = document.getElementById('chat-window');
+                if (win.style.display === "none" || win.style.display === "") {
+                    win.style.display = "flex";
+                } else {
+                    win.style.display = "none";
+                }
+            }
+
+            document.getElementById('chat-input').addEventListener('keypress', async (e) => {
+                if (e.key === 'Enter') {
+                    const input = e.target;
+                    const message = input.value.trim();
+                    if (!message) return;
+
+                    const body = document.getElementById('chat-body');
+                    body.innerHTML += `<div class="msg user-msg">${message}</div>`;
+                    input.value = '';
+                    body.scrollTop = body.scrollHeight;
+
+                    try {
+                        const response = await fetch('/api/chat', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ message })
+                        });
+                        const data = await response.json();
+                        body.innerHTML += `<div class="msg bot-msg">${data.reply}</div>`;
+                    } catch (err) {
+                        body.innerHTML += `<div class="msg bot-msg">Oops! I encountered an error. Please try again later.</div>`;
+                    }
+                    body.scrollTop = body.scrollHeight;
+                }
+            });
+        </script>
+</body>
+
+</html>

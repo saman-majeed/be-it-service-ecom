@@ -1,0 +1,277 @@
+/* Import fonts to match main site */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@400;600&display=swap');
+
+:root {
+    /* Brand Colors from style.css */
+    --green: #4cb050;
+    --green-dark: #2e8f3a;
+    --text: #1e1f21;
+    --muted: #7a7f85;
+    --border: #e8eaed;
+    --bg: #f7f9fb;
+    --white: #fff;
+}
+
+body {
+    display: flex;
+    margin: 0;
+    font-family: "Open Sans", sans-serif;
+    /* Matches main site */
+    background: var(--bg);
+    color: var(--text);
+}
+
+h1,
+h2,
+h3 {
+    font-family: 'Montserrat', sans-serif;
+    /* Matches main site */
+}
+
+/* ----- Sidebar (Matches Footer Color) ----- */
+.admin-sidebar {
+    width: 260px;
+    height: 100vh;
+    background: var(--text);
+    /* Dark grey like footer */
+    color: #aab2b9;
+    /* Footer text color */
+    position: fixed;
+    padding: 30px;
+    box-sizing: border-box;
+    /* ADDED FOR LOGOUT POSITIONING */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.admin-sidebar h2 {
+    color: var(--white);
+    margin-bottom: 50px;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Sidebar Links */
+.admin-sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #aab2b9;
+    text-decoration: none;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: 0.25s ease;
+}
+
+.admin-sidebar a i {
+    width: 20px;
+    text-align: center;
+}
+
+/* Active/Hover State (Brand Green) */
+.admin-sidebar a:hover,
+.admin-sidebar a.active {
+    background: rgba(76, 176, 80, 0.15);
+    /* Green with opacity */
+    color: var(--green);
+}
+
+/* ----- Main Content Area ----- */
+.admin-content {
+    margin-left: 260px;
+    padding: 50px;
+    width: 100%;
+}
+
+.admin-content h1 {
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.admin-content p {
+    color: var(--muted);
+    margin-bottom: 30px;
+}
+
+/* ----- Tables ----- */
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+th {
+    background: #f8f9fa;
+    color: var(--text);
+    font-weight: 700;
+    padding: 18px 24px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+td {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+/* Product Icon in Table */
+td i {
+    color: var(--green);
+    font-size: 1.2rem;
+    margin-right: 10px;
+    background: rgba(76, 176, 80, 0.1);
+    width: 36px;
+    height: 36px;
+    line-height: 36px;
+    text-align: center;
+    border-radius: 50%;
+}
+
+/* ----- Buttons (Brand Green) ----- */
+.btn-admin {
+    padding: 10px 20px;
+    border-radius: 50px;
+    /* Pill shape like main site */
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.btn-create {
+    background: var(--green);
+    color: var(--white);
+    margin-bottom: 25px;
+    box-shadow: 0 4px 10px rgba(76, 176, 80, 0.3);
+}
+
+.btn-create:hover {
+    background: var(--green-dark);
+}
+
+.btn-edit {
+    background: #fff;
+    border-color: var(--border);
+    color: var(--text);
+    padding: 6px 14px;
+}
+
+.btn-edit:hover {
+    border-color: var(--text);
+}
+
+.btn-delete {
+    background: #fff;
+    border-color: #ffebee;
+    color: #e53935;
+    padding: 6px 14px;
+    margin-left: 5px;
+}
+
+.btn-delete:hover {
+    background: #ffebee;
+}
+
+.btn-back {
+    background: transparent;
+    color: var(--muted);
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+.btn-back:hover {
+    color: var(--text);
+}
+
+/* ----- Forms ----- */
+form {
+    background: var(--white);
+    padding: 40px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    max-width: 600px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 15px;
+    transition: 0.2s;
+    box-sizing: border-box;
+    /* Fix width issues */
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(76, 176, 80, 0.1);
+}
+
+/* ----- NEW CHANGES FOR LOGOUT ----- */
+
+.sidebar-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 20px;
+    margin-top: auto;
+}
+
+.sidebar-footer p {
+    font-size: 13px;
+    color: #7a7f85;
+    margin-bottom: 10px;
+    padding-left: 18px;
+}
+
+.logout-link {
+    color: #ff4d4d !important;
+    font-weight: 700 !important;
+}
+
+.logout-link:hover {
+    background: rgba(255, 77, 77, 0.1) !important;
+    color: #ff1a1a !important;
+}
+
+.badge {
+    background: #f1f3f5;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+}

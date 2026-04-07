@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include('partials/head') %>
+        <title>
+            <%= product.name %> - Details
+        </title>
+        <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <%- include('partials/navbar') %>
+
+        <div class="container" style="padding-top: 150px; padding-bottom: 100px;">
+            <div
+                style="background: #fff; padding: 40px; border-radius: 16px; border: 1px solid var(--border); max-width: 800px; margin: 0 auto; display: flex; gap: 40px; align-items: center;">
+
+                <div
+                    style="font-size: 100px; color: var(--green); background: rgba(76, 176, 80, 0.1); padding: 40px; border-radius: 20px;">
+                    <i class="<%= product.iconClass %>"></i>
+                </div>
+
+                <div style="flex: 1;">
+                    <span class="tag"
+                        style="background: #f0fdf4; color: var(--green-dark); padding: 5px 12px; border-radius: 20px; font-size: 14px;">
+                        <%= product.category %>
+                    </span>
+                    <h1 style="margin-top: 15px; margin-bottom: 10px; font-size: 36px;">
+                        <%= product.name %>
+                    </h1>
+                    <p style="font-size: 18px; color: #666; line-height: 1.6; margin-bottom: 25px;">
+                        <%= product.description %>
+                    </p>
+
+                    <h2 style="color: var(--green); margin-bottom: 30px;">$<%= product.price %>
+                    </h2>
+
+                    <form action="/add-to-cart/<%= product._id %>" method="POST">
+                        <button type="submit" class="btn btn-primary"
+                            style="padding: 15px 30px; font-size: 18px; width: 100%; justify-content: center;">
+                            <i class="fa-solid fa-cart-plus"></i> Add to Cart & Checkout
+                        </button>
+                    </form>
+
+                    <br>
+                    <a href="/" class="btn btn-ghost" style="width: 100%; justify-content: center;">&larr; Continue
+                        Shopping</a>
+                </div>
+            </div>
+        </div>
+
+        <%- include('partials/footer') %>
+</body>
+
+</html>

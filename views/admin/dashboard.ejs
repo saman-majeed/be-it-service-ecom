@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Ensuring the delete form doesn't break the layout */
+        .delete-form {
+            display: inline;
+            margin: 0;
+            padding: 0;
+        }
+
+        .btn-delete {
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="admin-sidebar">
+        <div>
+            <h2><i class="fa-solid fa-lock"></i> Admin Panel</h2>
+            <a href="/admin" class="active"><i class="fa-solid fa-box"></i> Products</a>
+            <a href="/admin/orders"><i class="fa-solid fa-clipboard-list"></i> Orders</a>
+            <a href="/"><i class="fa-solid fa-earth-americas"></i> Visit Website</a>
+        </div>
+
+        <div style="border-top: 1px solid #444; padding-top: 20px;">
+            <p style="color: #888; font-size: 12px; margin-bottom: 10px;">User: <%= user ? user.name : 'Admin' %>
+            </p>
+            <a href="/logout" style="color: #ff4d4d; background: none; padding: 10px 0;"><i
+                    class="fa-solid fa-power-off"></i> Logout</a>
+        </div>
+    </div>
+
+    <div class="admin-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div>
+                <h1>Product Management</h1>
+                <p>Manage your store inventory below.</p>
+            </div>
+            <a href="/admin/product/new" class="btn-admin btn-create">+ Add New Product</a>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (products && products.length> 0) { %>
+                    <% products.forEach(product=> { %>
+                        <tr>
+                            <td>
+                                <i class="<%= product.iconClass || 'fa-solid fa-tag' %>"
+                                    style="margin-right: 8px; color: #4cb050;"></i>
+                                <strong>
+                                    <%= product.name %>
+                                </strong>
+                            </td>
+                            <td>
+                                <%= product.category %>
+                            </td>
+                            <td>$<%= product.price %>
+                            </td>
+                            <td>
+                                <a href="/admin/product/edit/<%= product._id %>" class="btn-admin btn-edit"
+                                    style="text-decoration: none;">Edit</a>
+
+                                <form action="/admin/product/delete/<%= product._id %>" method="POST"
+                                    class="delete-form"
+                                    onsubmit="return confirm('Are you sure you want to delete this product?')">
+                                    <button type="submit" class="btn-admin btn-delete">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <% }) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="4" style="text-align: center; padding: 20px;">No products found.</td>
+                                </tr>
+                                <% } %>
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>

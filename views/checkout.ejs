@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include('partials/head') %>
+        <title>Be IT:Service Checkout</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="/css/checkout.css">
+        <style>
+            .checkout-box {
+                max-width: 800px;
+                margin: 40px auto;
+                padding: 30px;
+                background: #fff;
+                border-radius: 12px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            }
+
+            .section-title {
+                font-size: 1.25rem;
+                font-weight: 700;
+                margin-bottom: 20px;
+                color: #333;
+                border-left: 4px solid #4cb050;
+                padding-left: 15px;
+            }
+
+            .btn-theme {
+                background-color: #4cb050;
+                color: white;
+                border: none;
+                transition: 0.3s;
+            }
+
+            .btn-theme:hover {
+                background-color: #3e8e41;
+                color: white;
+            }
+        </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <span class="d-inline-flex align-items-center">
+                    <span class="bubble">Be</span> IT:SERVICE
+                </span>
+            </a>
+            <a href="/" class="btn btn-sm btn-outline-light">Continue Shopping</a>
+        </div>
+    </nav>
+
+    <div class="container checkout-box">
+
+        <div id="order-success-msg" class="alert alert-success text-center py-4" style="display: none;">
+            <h3 class="fw-bold"><i class="fa-solid fa-circle-check"></i> Order Confirmed!</h3>
+            <p class="fs-5">Thank you! We have received your booking and will contact you shortly.</p>
+            <a href="/" class="btn btn-success mt-3">Return to Home</a>
+        </div>
+
+        <div id="checkout-content">
+            <h3 class="section-title">Your Cart</h3>
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Service / Product</th>
+                        <th class="text-end">Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (cart.length> 0) { %>
+                        <% cart.forEach(item=> { %>
+                            <tr>
+                                <td class="d-flex align-items-center">
+                                    <div
+                                        style="width: 50px; height: 50px; background: #f0fdf4; color: #4cb050; border-radius: 8px; display: grid; place-content: center; font-size: 24px; margin-right: 15px;">
+                                        <i class="<%= item.iconClass || 'fa-solid fa-gears' %>"></i>
+                                    </div>
+                                    <span>
+                                        <%= item.name %>
+                                    </span>
+                                </td>
+                                <td class="text-end">$<%= item.price %>
+                                </td>
+                            </tr>
+                            <% }) %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="2" class="text-center py-4 text-muted">Your cart is empty. <a
+                                                href="/">Go add some services!</a></td>
+                                    </tr>
+                                    <% } %>
+                </tbody>
+            </table>
+
+            <h3 class="section-title">Order Summary</h3>
+            <ul class="list-group mb-4">
+                <li class="list-group-item d-flex justify-content-between"><span>Subtotal</span><strong>$<%= total %>
+                    </strong></li>
+                <li class="list-group-item d-flex justify-content-between"><span>Handling Fee</span><strong>$10</strong>
+                </li>
+                <li class="list-group-item d-flex justify-content-between text-success fw-bold">
+                    <span>Total</span><strong>$<%= total + 10 %></strong>
+                </li>
+            </ul>
+
+            <% if (cart.length> 0) { %>
+                <div class="d-flex justify-content-end mb-4">
+                    <a href="/clear-cart" class="text-danger small text-decoration-none">Clear Cart</a>
+                </div>
+
+                <h3 class="section-title">Contact & Service Details</h3>
+
+                <form id="checkoutForm" method="POST">
+                    <input type="hidden" name="total" value="<%= total + 10 %>">
+
+                    <div class="mb-3">
+                        <label class="form-label">Device Drop-off/Pickup Address</label>
+                        <input type="text" name="address" class="form-control"
+                            placeholder="Enter your address for service" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" name="email" class="form-control" placeholder="name@example.com" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Primary Contact Number</label>
+                        <input type="text" name="phone" class="form-control" placeholder="e.g., +1 555 123 4567"
+                            required>
+                    </div>
+
+                    <h3 class="section-title">Payment Method</h3>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="cod" checked>
+                        <label class="form-check-label" for="cod">Pay on Delivery</label>
+                    </div>
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="radio" name="paymentMethod" id="online" value="online">
+                        <label class="form-check-label" for="online">Pay Online Now</label>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-success">Have a Coupon?</label>
+                        <input type="text" name="coupon" class="form-control" placeholder="Enter code (e.g. SAVE10)">
+                    </div>
+
+                    <button type="submit" formaction="/prepare-payment" class="btn btn-theme w-100 mb-2 py-2">
+                        Proceed to Online Payment
+                    </button>
+
+                    <button type="submit" formaction="/order/preview" class="btn btn-outline-dark w-100 py-2">
+                        Review & Confirm Booking ($<%= total + 10 %>)
+                    </button>
+                </form>
+                <% } %>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('order_success') === 'true') {
+            document.getElementById('order-success-msg').style.display = 'block';
+            document.getElementById('checkout-content').style.display = 'none';
+            window.history.replaceState(null, null, window.location.pathname);
+        }
+    </script>
+</body>
+
+</html>
