@@ -13,6 +13,24 @@ const productSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    stock: {
+        type: Number,
+        default: 50,
+        min: 0
+    },
+    costPrice: {
+        type: Number,
+        default: 0
+    },
+    reorderLevel: {
+        type: Number,
+        default: 10,
+        min: 0
+    },
+    priceHistory: [{
+        price: { type: Number, required: true },
+        recordedAt: { type: Date, default: Date.now }
+    }],
     description: String,
     iconClass: String, // Stores FontAwesome classes (e.g., "fa-solid fa-gear")
 

@@ -3,7 +3,6 @@
 
 <head>
     <%- include('partials/head') %>
-        <title>Be IT:Service — Repair & Boost Your Computer</title>
         <link rel="stylesheet" href="/css/style.css">
 </head>
 
@@ -373,11 +372,22 @@
                 <i class="fa-solid fa-times" onclick="toggleChat()" style="cursor:pointer"></i>
             </div>
             <div class="chat-body" id="chat-body">
-                <div class="msg bot-msg">Hello! I'm your AI assistant. How can I help you today? You can ask about
-                    services, tracking, or pricing.</div>
+                <div class="msg bot-msg">Hi! I'm your AI shopping agent for Be IT:Service. I can search products, recommend services, track orders, and manage your cart.
+                    <div class="chat-quick-chips">
+                        <button type="button" class="chat-quick-chip" data-msg="show me services">Services</button>
+                        <button type="button" class="chat-quick-chip" data-msg="find hardware under 150">Under $150</button>
+                        <button type="button" class="chat-quick-chip" data-msg="track my order">Track order</button>
+                        <button type="button" class="chat-quick-chip" data-msg="view cart">My cart</button>
+                        <button type="button" class="chat-quick-chip" data-msg="trending products">Trending</button>
+                        <button type="button" class="chat-quick-chip" data-msg="return policy">Returns</button>
+                    </div>
+                </div>
             </div>
             <div class="chat-footer">
-                <input type="text" id="chat-input" placeholder="Type your message here...">
+                <div class="chat-footer-row">
+                    <input type="text" id="chat-input" placeholder="Type your message here...">
+                    <button type="button" id="chat-send-btn" aria-label="Send"><i class="fa-solid fa-arrow-right"></i></button>
+                </div>
             </div>
         </div>
         <button id="chat-button" onclick="toggleChat()"
@@ -458,42 +468,8 @@
                 window.history.replaceState(null, null, window.location.pathname);
             }
 
-            // --- AI CHATBOT LOGIC ---
-            function toggleChat() {
-                const win = document.getElementById('chat-window');
-                if (win.style.display === "none" || win.style.display === "") {
-                    win.style.display = "flex";
-                } else {
-                    win.style.display = "none";
-                }
-            }
-
-            document.getElementById('chat-input').addEventListener('keypress', async (e) => {
-                if (e.key === 'Enter') {
-                    const input = e.target;
-                    const message = input.value.trim();
-                    if (!message) return;
-
-                    const body = document.getElementById('chat-body');
-                    body.innerHTML += `<div class="msg user-msg">${message}</div>`;
-                    input.value = '';
-                    body.scrollTop = body.scrollHeight;
-
-                    try {
-                        const response = await fetch('/api/chat', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ message })
-                        });
-                        const data = await response.json();
-                        body.innerHTML += `<div class="msg bot-msg">${data.reply}</div>`;
-                    } catch (err) {
-                        body.innerHTML += `<div class="msg bot-msg">Oops! I encountered an error. Please try again later.</div>`;
-                    }
-                    body.scrollTop = body.scrollHeight;
-                }
-            });
         </script>
+        <script src="/js/chat-widget.js?v=5"></script>
 </body>
 
 </html>

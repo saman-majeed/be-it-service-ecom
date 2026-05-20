@@ -1,0 +1,71 @@
+.seo-admin h1 { margin: 0 0 8px; font-size: 26px; }
+.seo-admin .seo-sub { color: #666; margin-bottom: 24px; font-size: 14px; }
+.seo-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.seo-tab {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: #fff;
+  text-decoration: none;
+  color: #333;
+  font-size: 13px;
+  font-weight: 600;
+}
+.seo-tab.active, .seo-tab:hover { background: #4cb050; color: #fff; border-color: #4cb050; }
+.seo-panel {
+  background: #fff;
+  border: 1px solid #e8eaed;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+.seo-panel h2 { font-size: 18px; margin: 0 0 16px; }
+.seo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 900px) { .seo-grid { grid-template-columns: 1fr; } }
+.seo-field label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #555; }
+.seo-field input, .seo-field textarea, .seo-field select {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+.seo-field textarea { min-height: 90px; resize: vertical; }
+.seo-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.seo-table th, .seo-table td { padding: 10px 8px; border-bottom: 1px solid #eee; text-align: left; }
+.seo-table th { font-size: 11px; text-transform: uppercase; color: #888; }
+.seo-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.seo-badge.active { background: #e8f5e9; color: #2e7d32; }
+.seo-badge.pending { background: #fff8e1; color: #f57f17; }
+.seo-badge.lost { background: #ffebee; color: #c62828; }
+.seo-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.seo-btn {
+  background: #4cb050;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.seo-btn.secondary { background: #f0f0f0; color: #333; }
+.seo-btn.danger { background: #ff4d4d; }
+.seo-alert { padding: 12px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; }
+.seo-alert.ok { background: #e8f5e9; color: #2e7d32; }
+.seo-checklist { margin: 0; padding-left: 20px; line-height: 1.7; font-size: 14px; color: #444; }
+.seo-stat-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+.seo-stat {
+  flex: 1;
+  min-width: 140px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 14px;
+}
+.seo-stat strong { display: block; font-size: 22px; color: #4cb050; }

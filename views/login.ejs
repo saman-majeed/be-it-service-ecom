@@ -29,6 +29,9 @@
                     <% } %>
 
                         <form action="/login" method="POST">
+                            <% if (typeof isAdminPage !== 'undefined' && isAdminPage) { %>
+                                <input type="hidden" name="loginType" value="admin">
+                            <% } %>
                             <div style="margin-bottom: 15px;">
                                 <label>Email</label>
                                 <input type="email" name="email"
@@ -44,9 +47,13 @@
                             <button type="submit"
                                 style="width: 100%; padding: 12px; background: #2ecc71; color: white; border: none; border-radius: 5px; cursor: pointer;">Login</button>
                         </form>
+                        <% if (typeof isAdminPage === 'undefined' || !isAdminPage) { %>
                         <p style="text-align: center; margin-top: 15px;">Don't have an account? <a href="/signup">Sign
                                 up</a>
                         </p>
+                        <% } else { %>
+                        <p style="text-align: center; margin-top: 15px;"><a href="/login">User login</a></p>
+                        <% } %>
     </div>
 
 </body>

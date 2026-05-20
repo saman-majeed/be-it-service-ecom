@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Inventory Control | Admin</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/css/inventory.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <%- include('../partials/admin-sidebar', { active: 'inventory', user }) %>
+
+    <div class="admin-content inventory-page">
+        <div class="inv-header">
+            <div>
+                <h1>AI Inventory Control</h1>
+                <p style="color:#666;margin:0;">Real-time analysis from your products &amp; orders</p>
+            </div>
+            <div style="text-align:right;">
+                <p class="inv-welcome">Welcome, <%= user ? user.name : 'Admin' %></p>
+                <button type="button" class="btn-refresh-ai" id="btnRefreshAI"><i class="fa-solid fa-wand-magic-sparkles"></i> Refresh AI</button>
+            </div>
+        </div>
+
+        <div class="ai-insight-banner" id="aiInsightBanner">
+            <%= aiInsights?.executiveSummary || analytics.insightBanner %>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card alert">
+                <h4>Out of Stock</h4>
+                <div class="kpi-value"><%= analytics.kpis.outOfStock %></div>
+                <p class="kpi-sub">products need restocking</p>
+            </div>
+            <div class="kpi-card warn">
+                <h4>Critical Stock (≤3)</h4>
+                <div class="kpi-value"><%= analytics.kpis.criticalStock %></div>
+                <p class="kpi-sub">products low on stock</p>
+            </div>
+            <div class="kpi-card warn">
+                <h4>Price Alert</h4>
+                <div class="kpi-value"><%= analytics.kpis.priceAlert %></div>
+                <p class="kpi-sub">products with rising prices</p>
+            </div>
+            <div class="kpi-card ok">
+                <h4>Healthy Stock</h4>
+                <div class="kpi-value"><%= analytics.kpis.healthyStock %></div>
+                <p class="kpi-sub">products well stocked</p>
+            </div>
+        </div>
+
+        <div class="charts-row">
+            <div class="inv-panel">
+                <h3><i class="fa-solid fa-chart-bar"></i> Category Sales</h3>
+                <canvas id="chartCategorySales" height="200"></canvas>
+            </div>
+            <div class="inv-panel">
+                <h3><i class="fa-solid fa-chart-line"></i> Revenue Trend <span style="font-weight:400;font-size:12px;color:#888;">LAST 6 MONTHS</span></h3>
+                <canvas id="chartRevenueTrend" height="200"></canvas>
+            </div>
+        </div>
+
+        <div class="tables-row">
+            <div class="inv-panel">
+                <div class="panel-head">
+                    <h3 style="margin:0;"><i class="fa-solid fa-boxes-stacked"></i> Stock Health</h3>
+                    <div class="stock-filters" id="stockFilters">
+                        <button type="button" class="active" data-filter="all">ALL</button>
+                        <button type="button" data-filter="critical">CRITICAL</button>
+                        <button type="button" data-filter="out">OUT</button>
+                    </div>
+                </div>
+                <div class="table-scroll">
+                    <table class="inv-table" id="stockHealthTable">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Category</th>
+                                <th>Stock</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% analytics.stockHealth.forEach(row => { %>
+                            <tr data-filter="<%= row.filter %>" data-status="<%= row.statusCode %>">
+                                <td>
+                                    <div class="product-cell">
+                                        <div class="product-icon"><i class="<%= row.iconClass %>"></i></div>
+                                        <span><%= row.name %></span>
+                                    </div>
+                                </td>
+                                <td><%= row.category %></td>
+                                <td>
+                                    <div class="stock-bar-wrap">
+                                        <div class="stock-bar"><div class="stock-bar-fill" style="width:<%= row.stockPct %>%"></div></div>
+                                        <span class="stock-num"><%= row.stock %></span>
+                                    </div>
+                                </td>
+                                <td><span class="status-badge <%= row.status %>"><%= row.status %></span></td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="inv-panel">
+                <div class="panel-head">
+                    <h3 style="margin:0;"><i class="fa-solid fa-triangle-exclamation"></i> Price Alerts</h3>
+                    <span class="ai-tag">AI recommends review</span>
+                </div>
+                <div class="table-scroll">
+                    <table class="inv-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Old Price</th>
+                                <th>New Price</th>
+                                <th>↑ %</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (analytics.priceAlerts.length === 0) { %>
+                            <tr class="empty-row"><td colspan="5">No significant price increases detected</td></tr>
+                            <% } %>
+                            <% analytics.priceAlerts.forEach(a => { %>
+                            <tr>
+                                <td>
+                                    <div class="product-cell">
+                                        <div class="product-icon"><i class="<%= a.iconClass %>"></i></div>
+                                        <span><%= a.name %></span>
+                                    </div>
+                                </td>
+                                <td class="price-old">$<%= a.oldPrice.toFixed(0) %></td>
+                                <td><strong>$<%= a.newPrice.toFixed(0) %></strong></td>
+                                <td><span class="pct-badge">+<%= a.changePct %>%</span></td>
+                                <td><a href="/admin/product/edit/<%= a.id %>" class="action-link"><%= a.action %></a></td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="inv-panel full-width">
+            <div class="panel-head">
+                <h3 style="margin:0;"><i class="fa-solid fa-trophy"></i> Top Selling Products</h3>
+                <span class="ai-tag">All-time performance (from orders)</span>
+            </div>
+            <div class="table-scroll" style="max-height:none;">
+                <table class="inv-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Units Sold</th>
+                            <th>Revenue</th>
+                            <th>Performance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% analytics.topSelling.forEach(row => { %>
+                        <tr>
+                            <td>
+                                <% if (row.rank === 1) { %><span class="rank-icon">🏆</span>
+                                <% } else if (row.rank === 2) { %><span class="rank-icon">🥈</span>
+                                <% } else if (row.rank === 3) { %><span class="rank-icon">🥉</span>
+                                <% } else { %><span class="rank-num">#<%= row.rank %></span><% } %>
+                            </td>
+                            <td>
+                                <div class="product-cell">
+                                    <div class="product-icon"><i class="<%= row.iconClass %>"></i></div>
+                                    <span><%= row.name %></span>
+                                </div>
+                            </td>
+                            <td><%= row.category %></td>
+                            <td>$<%= row.price.toFixed(0) %></td>
+                            <td><span class="stock-badge"><%= row.stock %></span></td>
+                            <td><strong><%= row.unitsSold %></strong></td>
+                            <td>$<%= row.revenue.toFixed(2) %></td>
+                            <td>
+                                <div class="perf-bar"><div class="perf-bar-fill" style="width:<%= row.performancePct %>%"></div></div>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.INVENTORY_DATA = <%- JSON.stringify(analytics) %>;
+        window.AI_INSIGHTS = <%- JSON.stringify(aiInsights || null) %>;
+    </script>
+    <script src="/js/inventory-dashboard.js?v=2"></script>
+</body>
+</html>

@@ -5,20 +5,59 @@ const path = require('path');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const bcrypt = require('bcryptjs');
+const { getMongoUri } = require('./lib/mongoUri');
 require('dotenv').config();
 
 // Models
 const Product = require('./models/Product');
 const Contact = require('./models/Contact');
 const Order = require('./models/Order');
-const User = require('./models/user');
+const User = require('./models/User');
 // ADDED: Import the Admin model for the separate collection
 const Admin = require('./models/Admin');
+const { buildInventoryDashboard } = require('./services/inventoryAnalytics');
+const { getAIInventoryRecommendations, getGroqChatReply } = require('./services/inventoryAI');
+const { handleChatMessage, getAutocomplete } = require('./services/chatAgent');
+const {
+    loadSeoGlobals,
+    getSiteSettings,
+    getBaseUrl,
+    buildSitemapXml,
+    buildRobotsTxt,
+    buildProductJsonLd,
+    slugify,
+    Backlink,
+    ParasiteCampaign,
+} = require('./services/seoService');
+
+try {
+    const compression = require('compression');
+    app.use(compression());
+} catch {
+    console.log('Tip: run npm install compression for gzip page optimization');
+}
 
 const PORT = process.env.PORT || 3000;
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, {
+function parseProductFields(body) {
+    return {
+        name: body.name,
+        category: body.category,
+        price: Number(body.price),
+        description: body.description,
+        iconClass: body.iconClass,
+        metaTitle: body.metaTitle,
+        metaDescription: body.metaDescription,
+        keywords: body.keywords,
+        stock: Number(body.stock) >= 0 ? Number(body.stock) : 50,
+        costPrice: Number(body.costPrice) >= 0 ? Number(body.costPrice) : Number(body.price) * 0.65,
+        reorderLevel: Number(body.reorderLevel) >= 0 ? Number(body.reorderLevel) : 10,
+    };
+}
+
+// Connect to MongoDB (direct URI fallback when SRV DNS fails)
+mongoose.connect(getMongoUri(), {
+    serverSelectionTimeoutMS: 15000,
     tls: true,
     tlsAllowInvalidCertificates: true
 })
@@ -46,25 +85,34 @@ app.use(session({
     cookie: { secure: false }
 }));
 
-// Global middleware
+// Global middleware (cart, user, SEO)
 app.use((req, res, next) => {
     res.locals.cart = req.session.cart || [];
     res.locals.user = req.session.user || null;
-    res.locals.seoTitle = 'Be IT:Service - IT Solutions';
-    res.locals.seoDesc = 'Professional IT services and e-commerce solutions.';
-    res.locals.seoKeywords = 'IT, software, hardware, services';
     next();
 });
+app.use(loadSeoGlobals);
 
 // ================= AUTH MIDDLEWARE =================
 const isAdmin = (req, res, next) => {
     if (req.session.user && req.session.user.role === 'admin') return next();
-    res.redirect('/login?error=Admin Access Required');
+    if (req.session.user) {
+        return res.redirect('/login?admin=true&error=You are logged in as a regular user. Log out first, then use Admin Login.');
+    }
+    res.redirect('/login?admin=true&error=Admin Access Required');
+};
+
+const isAdminApi = (req, res, next) => {
+    if (req.session.user && req.session.user.role === 'admin') return next();
+    res.status(403).json({ success: false, error: 'Admin access required' });
 };
 
 // ================= AUTH ROUTES =================
 app.get('/login', (req, res) => {
-    const isAdminPage = req.query.error === 'Admin Access Required' || req.query.admin === 'true';
+    const isAdminPage = req.query.admin === 'true' || String(req.query.error || '').includes('Admin');
+    if (req.session.user?.role === 'admin' && isAdminPage) {
+        return res.redirect('/admin');
+    }
     res.render('login', {
         error: req.query.error,
         success: req.query.success,
@@ -103,39 +151,57 @@ app.post('/signup', async (req, res) => {
     }
 });
 
-// UPDATED: Login logic to check both 'users' and 'admin' collections separately
+// Login: admin page checks admin collection first (same email can exist in both)
 app.post('/login', async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, loginType } = req.body;
+    const wantAdmin = loginType === 'admin';
+
+    const fail = (msg) =>
+        res.redirect(wantAdmin ? `/login?admin=true&error=${encodeURIComponent(msg)}` : `/login?error=${encodeURIComponent(msg)}`);
+
     try {
-        // 1. Search the regular users collection first
-        let user = await User.findOne({ email });
-        let isFromAdminCollection = false;
+        let account = null;
+        let role = 'user';
 
-        // 2. If not found in users, search the separate admin collection
-        if (!user) {
-            user = await Admin.findOne({ email });
-            if (user) isFromAdminCollection = true;
+        if (wantAdmin) {
+            const adminDoc = await Admin.findOne({ email });
+            if (adminDoc) {
+                account = adminDoc;
+                role = 'admin';
+            } else {
+                const userAdmin = await User.findOne({ email, role: 'admin' });
+                if (userAdmin) {
+                    account = userAdmin;
+                    role = 'admin';
+                }
+            }
+        } else {
+            account = await User.findOne({ email });
+            if (account) role = account.role || 'user';
         }
 
-        // 3. Verify credentials if a match was found in either collection
-        if (user && await bcrypt.compare(password, user.password)) {
-            // CRITICAL: Set the role explicitly based on the source collection 
-            // This prevents redirect loops back to login
-            req.session.user = {
-                _id: user._id,
-                name: user.name,
-                role: isFromAdminCollection ? 'admin' : user.role,
-                email: user.email
-            };
-
-            // 4. Determine final redirect
-            const finalRole = isFromAdminCollection ? 'admin' : user.role;
-            return res.redirect(finalRole === 'admin' ? '/admin' : '/');
+        if (!account || !(await bcrypt.compare(password, account.password))) {
+            return fail('Invalid Credentials');
         }
-        res.redirect('/login?error=Invalid Credentials');
+
+        if (wantAdmin && role !== 'admin') {
+            return fail('This account is not an admin. Use the regular login page.');
+        }
+
+        req.session.user = {
+            _id: account._id,
+            name: account.name,
+            role,
+            email: account.email
+        };
+
+        if (wantAdmin || role === 'admin') {
+            return res.redirect('/admin');
+        }
+        return res.redirect('/');
     } catch (err) {
-        console.error("Login Error:", err);
-        res.redirect('/login?error=Server Error');
+        console.error('Login Error:', err);
+        return fail('Server Error');
     }
 });
 
@@ -166,7 +232,38 @@ app.post('/contact', async (req, res) => {
 
 app.get('/admin', isAdmin, async (req, res) => {
     const products = await Product.find();
-    res.render('admin/dashboard', { products });
+    res.render('admin/dashboard', { products, user: req.session.user });
+});
+
+// ================= AI INVENTORY CONTROL DASHBOARD =================
+app.get('/admin/inventory', isAdmin, async (req, res) => {
+    try {
+        const analytics = await buildInventoryDashboard();
+        let aiInsights = null;
+        try {
+            aiInsights = await getAIInventoryRecommendations(analytics);
+        } catch (aiErr) {
+            console.error('Groq inventory insights:', aiErr.message);
+        }
+        res.render('admin/inventory', {
+            analytics,
+            aiInsights,
+            user: req.session.user
+        });
+    } catch (err) {
+        console.error('Inventory dashboard error:', err);
+        res.status(500).send('Could not load inventory dashboard.');
+    }
+});
+
+app.post('/api/admin/inventory/ai-insights', isAdminApi, async (req, res) => {
+    try {
+        const analytics = await buildInventoryDashboard();
+        const insights = await getAIInventoryRecommendations(analytics);
+        res.json({ success: true, insights });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
 });
 
 app.get('/admin/users', isAdmin, async (req, res) => {
@@ -179,12 +276,14 @@ app.get('/admin/users', isAdmin, async (req, res) => {
 });
 
 app.get('/admin/product/new', isAdmin, (req, res) => {
-    res.render('admin/edit-product', { editing: false, product: {} });
+    res.render('admin/edit-product', { editing: false, product: {}, user: req.session.user });
 });
 
 app.post('/admin/product/new', isAdmin, async (req, res) => {
     try {
-        const newProduct = new Product(req.body);
+        const fields = parseProductFields(req.body);
+        const newProduct = new Product(fields);
+        newProduct.priceHistory = [{ price: fields.price, recordedAt: new Date() }];
         await newProduct.save();
         res.redirect('/admin');
     } catch (err) {
@@ -196,7 +295,7 @@ app.get('/admin/product/edit/:id', isAdmin, async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
         if (!product) return res.redirect('/admin');
-        res.render('admin/edit-product', { product, editing: true });
+        res.render('admin/edit-product', { product, editing: true, user: req.session.user });
     } catch (err) {
         res.redirect('/admin');
     }
@@ -204,7 +303,18 @@ app.get('/admin/product/edit/:id', isAdmin, async (req, res) => {
 
 app.post('/admin/product/edit/:id', isAdmin, async (req, res) => {
     try {
-        await Product.findByIdAndUpdate(req.params.id, req.body);
+        const product = await Product.findById(req.params.id);
+        if (!product) return res.redirect('/admin');
+        const fields = parseProductFields(req.body);
+        const update = { ...fields };
+        if (fields.price !== product.price) {
+            await Product.findByIdAndUpdate(req.params.id, {
+                ...update,
+                $push: { priceHistory: { price: product.price, recordedAt: new Date() } }
+            });
+        } else {
+            await Product.findByIdAndUpdate(req.params.id, update);
+        }
         res.redirect('/admin');
     } catch (err) {
         res.status(500).send("Error updating product: " + err.message);
@@ -223,7 +333,7 @@ app.post('/admin/product/delete/:id', isAdmin, async (req, res) => {
 // ================= ADMIN ORDER MANAGEMENT =================
 app.get('/admin/orders', isAdmin, async (req, res) => {
     const orders = await Order.find().sort({ date: -1 });
-    res.render('admin/orders', { orders });
+    res.render('admin/orders', { orders, user: req.session.user });
 });
 
 app.post('/admin/order/update-status/:id', isAdmin, async (req, res) => {
@@ -241,6 +351,160 @@ app.post('/admin/order/update-status/:id', isAdmin, async (req, res) => {
         res.redirect('/admin/orders');
     } catch (err) {
         res.status(500).send("Error updating status");
+    }
+});
+
+// ================= SEO ADMIN =================
+app.get('/admin/seo', isAdmin, async (req, res) => {
+    try {
+        const settings = await getSiteSettings();
+        const backlinks = await Backlink.find().sort({ createdAt: -1 }).lean();
+        const campaigns = await ParasiteCampaign.find().sort({ createdAt: -1 }).lean();
+        const activeBacklinks = backlinks.filter((b) => b.status === 'active').length;
+        const publishedParasite = campaigns.filter((c) => c.status === 'published').length;
+        const totalClicks =
+            backlinks.reduce((s, b) => s + (b.clickCount || 0), 0) +
+            campaigns.reduce((s, c) => s + (c.clickCount || 0), 0);
+        res.render('admin/seo', {
+            settings,
+            backlinks,
+            campaigns,
+            stats: { activeBacklinks, publishedParasite, totalClicks },
+            success: req.query.success,
+            user: req.session.user,
+        });
+    } catch (err) {
+        res.status(500).send('SEO admin error: ' + err.message);
+    }
+});
+
+app.post('/admin/seo/settings', isAdmin, async (req, res) => {
+    try {
+        const settings = await getSiteSettings();
+        const b = req.body;
+        settings.siteName = b.siteName || settings.siteName;
+        settings.defaultTitle = b.defaultTitle || settings.defaultTitle;
+        settings.defaultDescription = b.defaultDescription || settings.defaultDescription;
+        settings.defaultKeywords = b.defaultKeywords || settings.defaultKeywords;
+        settings.homeTitle = b.homeTitle || '';
+        settings.homeDescription = b.homeDescription || '';
+        settings.canonicalBaseUrl = (b.canonicalBaseUrl || '').trim();
+        settings.ogImage = b.ogImage || settings.ogImage;
+        settings.twitterHandle = b.twitterHandle || settings.twitterHandle;
+        settings.googleSiteVerification = b.googleSiteVerification || '';
+        settings.bingSiteVerification = b.bingSiteVerification || '';
+        settings.allowIndexing = b.allowIndexing === '1';
+        settings.enableJsonLd = b.enableJsonLd === '1';
+        settings.updatedAt = new Date();
+        await settings.save();
+        res.redirect('/admin/seo?success=On-page+SEO+settings+saved');
+    } catch (err) {
+        res.status(500).send('Save error: ' + err.message);
+    }
+});
+
+app.post('/admin/seo/offpage', isAdmin, async (req, res) => {
+    try {
+        const settings = await getSiteSettings();
+        settings.offPageChecklist = req.body.offPageChecklist || settings.offPageChecklist;
+        settings.parasiteStrategy = req.body.parasiteStrategy || settings.parasiteStrategy;
+        await settings.save();
+        res.redirect('/admin/seo?success=Off-page+checklist+saved#offpage');
+    } catch (err) {
+        res.status(500).send('Save error: ' + err.message);
+    }
+});
+
+app.post('/admin/seo/backlinks', isAdmin, async (req, res) => {
+    try {
+        const b = req.body;
+        let slug = slugify(b.partnerName);
+        const exists = await Backlink.findOne({ slug });
+        if (exists) slug = `${slug}-${Date.now().toString(36)}`;
+        await Backlink.create({
+            partnerName: b.partnerName,
+            targetUrl: b.targetUrl,
+            anchorText: b.anchorText || b.partnerName,
+            linkType: b.linkType || 'nofollow',
+            direction: b.direction || 'outbound',
+            status: b.status || 'pending',
+            domainAuthority: Number(b.domainAuthority) || 0,
+            notes: b.notes || '',
+            showOnFooter: b.showOnFooter === '1',
+            showOnResources: b.showOnResources === '1',
+            slug,
+        });
+        res.redirect('/admin/seo?success=Backlink+added#backlinks');
+    } catch (err) {
+        res.status(500).send('Backlink error: ' + err.message);
+    }
+});
+
+app.post('/admin/seo/backlinks/delete/:id', isAdmin, async (req, res) => {
+    await Backlink.findByIdAndDelete(req.params.id);
+    res.redirect('/admin/seo?success=Backlink+removed#backlinks');
+});
+
+app.post('/admin/seo/parasite', isAdmin, async (req, res) => {
+    try {
+        const b = req.body;
+        await ParasiteCampaign.create({
+            platform: b.platform,
+            title: b.title,
+            externalUrl: b.externalUrl || '',
+            targetPage: b.targetPage || '/',
+            anchorText: b.anchorText || '',
+            utmSource: b.utmSource || '',
+            utmMedium: 'parasite',
+            utmCampaign: b.utmCampaign || slugify(b.title),
+            status: b.status || 'draft',
+            publishedAt: b.status === 'published' ? new Date() : undefined,
+        });
+        res.redirect('/admin/seo?success=Parasite+campaign+added#parasite');
+    } catch (err) {
+        res.status(500).send('Campaign error: ' + err.message);
+    }
+});
+
+app.post('/admin/seo/parasite/delete/:id', isAdmin, async (req, res) => {
+    await ParasiteCampaign.findByIdAndDelete(req.params.id);
+    res.redirect('/admin/seo?success=Campaign+removed#parasite');
+});
+
+// ================= PUBLIC SEO =================
+app.get('/robots.txt', async (req, res) => {
+    const settings = await getSiteSettings();
+    const baseUrl = getBaseUrl(req, settings);
+    res.type('text/plain');
+    res.send(buildRobotsTxt(baseUrl, settings.allowIndexing));
+});
+
+app.get('/sitemap.xml', async (req, res) => {
+    const settings = await getSiteSettings();
+    const baseUrl = getBaseUrl(req, settings);
+    res.type('application/xml');
+    res.send(await buildSitemapXml(baseUrl));
+});
+
+app.get('/resources', async (req, res) => {
+    const backlinks = await Backlink.find({ status: 'active', showOnResources: true })
+        .sort({ partnerName: 1 })
+        .lean();
+    res.render('resources', { backlinks, user: req.session.user || null });
+});
+
+app.get('/out/:slug', async (req, res) => {
+    try {
+        const bl = await Backlink.findOne({ slug: req.params.slug });
+        if (!bl) return res.redirect('/');
+        if (bl.trackClicks) {
+            bl.clickCount = (bl.clickCount || 0) + 1;
+            bl.lastCheckedAt = new Date();
+            await bl.save();
+        }
+        res.redirect(302, bl.targetUrl);
+    } catch {
+        res.redirect('/');
     }
 });
 
@@ -265,11 +529,27 @@ app.get('/', async (req, res) => {
 app.get('/product/:id', async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
+        if (product) {
+            req.session.lastViewedProduct = product.toObject();
+            if (!req.session.viewedProductIds) req.session.viewedProductIds = [];
+            const pid = product._id.toString();
+            if (!req.session.viewedProductIds.includes(pid)) {
+                req.session.viewedProductIds.push(pid);
+            }
+        }
+        const settings = await getSiteSettings();
+        const baseUrl = getBaseUrl(req, settings);
+        const desc = product.metaDescription || (product.description || '').substring(0, 160);
         res.render('product-details', {
             product,
-            seoTitle: product.metaTitle || product.name,
-            seoDesc: product.metaDescription || product.description.substring(0, 160),
-            seoKeywords: product.keywords || ''
+            seoTitle: product.metaTitle || `${product.name} | ${settings.siteName}`,
+            seoDesc: desc,
+            seoKeywords: product.keywords || settings.defaultKeywords,
+            seoCanonical: `${baseUrl}/product/${product._id}`,
+            seoOgType: 'product',
+            seoJsonLd: settings.enableJsonLd
+                ? buildProductJsonLd(product, baseUrl)
+                : null,
         });
     } catch (err) {
         res.redirect('/');
@@ -392,50 +672,47 @@ app.post('/my-orders', async (req, res) => {
     res.render('my-orders', { orders, error: orders.length ? null : "No orders found." });
 });
 
-// ================= AI CHATBOT AGENT API =================
+// ================= AI SHOPPING AGENT =================
 app.post('/api/chat', async (req, res) => {
     try {
-        const message = req.body.message ? req.body.message.toLowerCase() : "";
-        let reply = "I'm your AI assistant! Ask me about your orders, our services, or policies.";
-
-        if (message.includes("order") || message.includes("status") || message.includes("track")) {
-            const userEmail = req.session.user ? req.session.user.email : null;
-            if (userEmail) {
-                const latestOrder = await Order.findOne({ email: userEmail }).sort({ date: -1 });
-                if (latestOrder) {
-                    reply = `Your latest order (ID: ...${latestOrder._id.toString().slice(-6)}) is currently **${latestOrder.status}**.`;
-                } else {
-                    reply = "I couldn't find any orders linked to your account.";
-                }
-            } else {
-                reply = "Please log in first so I can find your order details!";
-            }
+        const message = (req.body.message || '').trim();
+        if (!message) {
+            return res.json({ type: 'text', reply: 'Please type a message.' });
         }
-
-        else if (message.includes("show") || message.includes("product") || message.includes("service") || message.includes("find")) {
-            const products = await Product.find().limit(2);
-            if (products.length > 0) {
-                const names = products.map(p => p.name).join(" and ");
-                reply = `We offer great services like ${names}. Check our 'Offer' section for more!`;
-            } else {
-                reply = "We have many hardware and software solutions available. What are you looking for specifically?";
-            }
-        }
-
-        else if (message.includes("return") || message.includes("refund")) {
-            reply = "We offer a 30-day return policy on most hardware repairs and software services.";
-        }
-        else if (message.includes("shipping") || message.includes("delivery") || message.includes("time")) {
-            reply = "Most repairs are completed and returned within 4 business days!";
-        }
-        else if (message.includes("payment") || message.includes("pay")) {
-            reply = "We accept Cash on Delivery (COD) and Online Card payments.";
-        }
-
-        res.json({ reply });
+        const response = await handleChatMessage(message, req.session);
+        return res.json(response);
     } catch (err) {
-        console.error("Chat API Error:", err);
-        res.json({ reply: "Oops! I encountered an error. Please try again later." });
+        console.error('Chat API Error:', err);
+        res.json({ type: 'text', reply: 'Oops! I encountered an error. Please try again later.' });
+    }
+});
+
+app.get('/api/chat/suggest', async (req, res) => {
+    try {
+        const q = (req.query.q || '').trim();
+        const suggestions = await getAutocomplete(q);
+        res.json({ suggestions });
+    } catch (err) {
+        res.json({ suggestions: [] });
+    }
+});
+
+app.post('/api/chat/cart/add/:id', async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
+        if (!product) return res.json({ success: false, message: 'Product not found' });
+        if (!req.session.cart) req.session.cart = [];
+        const doc = product.toObject();
+        req.session.cart.push(doc);
+        req.session.lastViewedProduct = doc;
+        req.session.lastChatAt = new Date();
+        res.json({
+            success: true,
+            message: `Added "${product.name}" to cart`,
+            cartCount: req.session.cart.length,
+        });
+    } catch (err) {
+        res.json({ success: false, message: 'Could not add to cart' });
     }
 });
 

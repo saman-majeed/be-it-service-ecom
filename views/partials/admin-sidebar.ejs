@@ -1,0 +1,15 @@
+<div class="admin-sidebar">
+    <div>
+        <h2><i class="fa-solid fa-lock"></i> Admin Panel</h2>
+        <a href="/admin" class="<%= active === 'products' ? 'active' : '' %>"><i class="fa-solid fa-box"></i> Products</a>
+        <a href="/admin/inventory" class="<%= active === 'inventory' ? 'active' : '' %>"><i class="fa-solid fa-chart-line"></i> AI Inventory</a>
+        <a href="/admin/orders" class="<%= active === 'orders' ? 'active' : '' %>"><i class="fa-solid fa-clipboard-list"></i> Orders</a>
+        <a href="/admin/seo" class="<%= active === 'seo' ? 'active' : '' %>"><i class="fa-solid fa-magnifying-glass-chart"></i> SEO & Backlinks</a>
+        <a href="/"><i class="fa-solid fa-earth-americas"></i> Visit Website</a>
+    </div>
+
+    <div style="border-top: 1px solid #444; padding-top: 20px;">
+        <p style="color: #888; font-size: 12px; margin-bottom: 10px;">User: <%= user ? user.name : 'Admin' %></p>
+        <a href="/logout" style="color: #ff4d4d; background: none; padding: 10px 0;"><i class="fa-solid fa-power-off"></i> Logout</a>
+    </div>
+    </div>

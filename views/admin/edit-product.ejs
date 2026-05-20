@@ -45,12 +45,7 @@
 
 <body>
 
-    <div class="admin-sidebar">
-        <h2>Admin Panel</h2>
-        <a href="/admin">Products</a>
-        <a href="/admin/orders">Orders</a>
-        <a href="/">Visit Website</a>
-    </div>
+    <%- include('../partials/admin-sidebar', { active: 'products', user: typeof user !== 'undefined' ? user : null }) %>
 
     <div class="admin-content">
         <a href="/admin" class="btn-admin btn-back" style="text-decoration: none; color: #666;">&larr; Back to
@@ -81,8 +76,28 @@
 
             <div class="form-group">
                 <label>Price ($)</label>
-                <input type="number" name="price" class="form-control" value="<%= editing ? product.price : '' %>"
+                <input type="number" step="0.01" name="price" class="form-control" value="<%= editing ? product.price : '' %>"
                     required>
+            </div>
+
+            <div class="seo-box" style="border-left-color:#3498db;">
+                <h3>Inventory &amp; Cost</h3>
+                <div class="form-group">
+                    <label>Stock quantity</label>
+                    <input type="number" name="stock" class="form-control" min="0"
+                        value="<%= editing && product.stock != null ? product.stock : 50 %>">
+                </div>
+                <div class="form-group">
+                    <label>Cost price ($)</label>
+                    <input type="number" step="0.01" name="costPrice" class="form-control" min="0"
+                        value="<%= editing && product.costPrice ? product.costPrice : '' %>"
+                        placeholder="For profit margin analysis">
+                </div>
+                <div class="form-group">
+                    <label>Reorder level</label>
+                    <input type="number" name="reorderLevel" class="form-control" min="0"
+                        value="<%= editing && product.reorderLevel != null ? product.reorderLevel : 10 %>">
+                </div>
             </div>
 
             <div class="form-group">

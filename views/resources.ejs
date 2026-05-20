@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <%- include('partials/head') %>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <%- include('partials/navbar') %>
+
+    <section class="container" style="padding-top: 140px; padding-bottom: 80px; max-width: 900px;">
+        <h1 style="margin-bottom: 10px;">Resources &amp; Partners</h1>
+        <p style="color: #666; margin-bottom: 32px; line-height: 1.6;">
+            Trusted IT resources, partner sites, and helpful links. Building quality backlinks supports better search visibility.
+        </p>
+
+        <% if (backlinks && backlinks.length) { %>
+        <div style="display: grid; gap: 16px;">
+            <% backlinks.forEach(function (bl) { %>
+            <article style="background: #fff; border: 1px solid var(--border, #e8eaed); border-radius: 12px; padding: 20px;">
+                <h2 style="font-size: 18px; margin: 0 0 8px;">
+                    <% if (bl.slug && bl.trackClicks !== false) { %>
+                    <a href="/out/<%= bl.slug %>" rel="<%= bl.linkType === 'dofollow' ? 'noopener' : 'nofollow noopener' %>" target="_blank">
+                        <%= bl.partnerName %>
+                    </a>
+                    <% } else { %>
+                    <a href="<%= bl.targetUrl %>" rel="<%= bl.linkType === 'dofollow' ? 'noopener' : 'nofollow noopener' %>" target="_blank">
+                        <%= bl.partnerName %>
+                    </a>
+                    <% } %>
+                </h2>
+                <% if (bl.anchorText) { %><p style="color: #888; font-size: 14px; margin: 0 0 8px;"><%= bl.anchorText %></p><% } %>
+                <span style="font-size: 12px; background: #f0f7f1; color: #2e7d32; padding: 4px 10px; border-radius: 12px;">
+                    <%= bl.direction %> · <%= bl.linkType %>
+                </span>
+            </article>
+            <% }); %>
+        </div>
+        <% } else { %>
+        <p style="color: #888;">Partner links will appear here once added in Admin → SEO &amp; Backlinks.</p>
+        <% } %>
+
+        <p style="margin-top: 40px;">
+            <a href="/" class="btn btn-primary">← Back to shop</a>
+        </p>
+    </section>
+
+    <%- include('partials/footer') %>
+</body>
+
+</html>

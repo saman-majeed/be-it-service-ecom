@@ -19,5 +19,21 @@
             </ul>
         </div>
     </div>
+    <% if (typeof footerBacklinks !== 'undefined' && footerBacklinks && footerBacklinks.length) { %>
+    <div class="container" style="padding: 24px 0 8px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 20px;">
+        <h4 style="margin-bottom: 12px; font-size: 14px; opacity: 0.9;">Partners &amp; resources</h4>
+        <div style="display: flex; flex-wrap: wrap; gap: 12px 20px;">
+            <% footerBacklinks.forEach(function (bl) { %>
+            <a href="<%= bl.slug ? '/out/' + bl.slug : bl.targetUrl %>"
+               rel="<%= bl.linkType === 'dofollow' ? 'noopener' : 'nofollow noopener' %>"
+               target="_blank"
+               style="color: #c9a86c; font-size: 13px; text-decoration: none;">
+                <%= bl.anchorText || bl.partnerName %>
+            </a>
+            <% }); %>
+            <a href="/resources" style="color: #4cb050; font-size: 13px;">All resources →</a>
+        </div>
+    </div>
+    <% } %>
     <div class="copyright">© 2025 Be IT:Service | All Rights Reserved | Powered by Node.js</div>
 </footer>

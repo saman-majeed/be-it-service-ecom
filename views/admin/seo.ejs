@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SEO & Backlinks | Admin</title>
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/css/seo-admin.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <%- include('../partials/admin-sidebar', { active: 'seo', user }) %>
+    <div class="admin-content seo-admin">
+        <h1><i class="fa-solid fa-magnifying-glass-chart"></i> SEO & Backlink Manager</h1>
+        <p class="seo-sub">On-page meta, off-page checklist, parasite campaigns, and backlink tracking.</p>
+
+        <% if (typeof success !== 'undefined' && success) { %>
+        <div class="seo-alert ok"><%= success %></div>
+        <% } %>
+
+        <div class="seo-stat-row">
+            <div class="seo-stat"><strong><%= stats.activeBacklinks %></strong> Active backlinks</div>
+            <div class="seo-stat"><strong><%= stats.publishedParasite %></strong> Published parasite posts</div>
+            <div class="seo-stat"><strong><%= stats.totalClicks %></strong> Tracked link clicks</div>
+        </div>
+
+        <nav class="seo-tabs">
+            <a href="#onpage" class="seo-tab active">On-page SEO</a>
+            <a href="#offpage" class="seo-tab">Off-page SEO</a>
+            <a href="#parasite" class="seo-tab">Parasite SEO</a>
+            <a href="#backlinks" class="seo-tab">Backlinks</a>
+            <a href="/sitemap.xml" target="_blank" class="seo-tab">View sitemap</a>
+            <a href="/robots.txt" target="_blank" class="seo-tab">View robots.txt</a>
+            <a href="/resources" target="_blank" class="seo-tab">Resources page</a>
+        </nav>
+
+        <section id="onpage" class="seo-panel">
+            <h2>On-page SEO (site-wide)</h2>
+            <form method="POST" action="/admin/seo/settings">
+                <div class="seo-grid">
+                    <div class="seo-field"><label>Site name</label><input name="siteName" value="<%= settings.siteName %>"></div>
+                    <div class="seo-field"><label>Canonical base URL</label><input name="canonicalBaseUrl" placeholder="https://yoursite.com" value="<%= settings.canonicalBaseUrl %>"></div>
+                    <div class="seo-field"><label>Default title</label><input name="defaultTitle" value="<%= settings.defaultTitle %>"></div>
+                    <div class="seo-field"><label>Homepage title (override)</label><input name="homeTitle" value="<%= settings.homeTitle %>"></div>
+                    <div class="seo-field" style="grid-column: 1 / -1;"><label>Default meta description</label><textarea name="defaultDescription"><%= settings.defaultDescription %></textarea></div>
+                    <div class="seo-field" style="grid-column: 1 / -1;"><label>Homepage description (override)</label><textarea name="homeDescription"><%= settings.homeDescription %></textarea></div>
+                    <div class="seo-field" style="grid-column: 1 / -1;"><label>Keywords (comma-separated)</label><input name="defaultKeywords" value="<%= settings.defaultKeywords %>"></div>
+                    <div class="seo-field"><label>OG image path or URL</label><input name="ogImage" value="<%= settings.ogImage %>"></div>
+                    <div class="seo-field"><label>Twitter @handle</label><input name="twitterHandle" value="<%= settings.twitterHandle %>"></div>
+                    <div class="seo-field"><label>Google site verification</label><input name="googleSiteVerification" value="<%= settings.googleSiteVerification %>"></div>
+                    <div class="seo-field"><label>Bing site verification</label><input name="bingSiteVerification" value="<%= settings.bingSiteVerification %>"></div>
+                    <div class="seo-field"><label><input type="checkbox" name="allowIndexing" value="1" <%= settings.allowIndexing ? 'checked' : '' %>> Allow search indexing</label></div>
+                    <div class="seo-field"><label><input type="checkbox" name="enableJsonLd" value="1" <%= settings.enableJsonLd ? 'checked' : '' %>> JSON-LD structured data</label></div>
+                </div>
+                <p style="font-size: 13px; color: #666; margin: 12px 0;">Per-product SEO: edit each product under <strong>Products</strong> → SEO & Meta Details.</p>
+                <button type="submit" class="seo-btn">Save on-page settings</button>
+            </form>
+        </section>
+
+        <section id="offpage" class="seo-panel">
+            <h2>Off-page SEO (strategy checklist)</h2>
+            <form method="POST" action="/admin/seo/offpage">
+                <div class="seo-field"><label>Your off-page tasks (one per line)</label><textarea name="offPageChecklist" rows="6"><%= settings.offPageChecklist %></textarea></div>
+                <div class="seo-field" style="margin-top: 12px;"><label>Parasite SEO strategy notes</label><textarea name="parasiteStrategy" rows="4"><%= settings.parasiteStrategy %></textarea></div>
+                <button type="submit" class="seo-btn">Save checklist</button>
+            </form>
+            <h3 style="margin-top: 20px; font-size: 15px;">Recommended actions</h3>
+            <ul class="seo-checklist">
+                <li>Submit sitemap in <strong>Google Search Console</strong> → <code>/sitemap.xml</code></li>
+                <li>Build inbound links via guest posts, directories, and partners</li>
+                <li>Share product pages on social with Open Graph previews (auto-enabled)</li>
+                <li>Encourage reviews and local business listings</li>
+            </ul>
+        </section>
+
+        <section id="parasite" class="seo-panel">
+            <h2>Parasite SEO campaigns</h2>
+            <p style="font-size: 13px; color: #666;">Track content on high-authority platforms (Medium, LinkedIn, Quora) linking back to your store.</p>
+            <form method="POST" action="/admin/seo/parasite" style="margin-bottom: 20px;">
+                <div class="seo-grid">
+                    <div class="seo-field"><label>Platform</label>
+                        <select name="platform">
+                            <% ['Medium','LinkedIn','Quora','Reddit','YouTube','Guest Blog','Other'].forEach(function(p) { %>
+                            <option value="<%= p %>"><%= p %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    <div class="seo-field"><label>Title</label><input name="title" required></div>
+                    <div class="seo-field"><label>External URL</label><input name="externalUrl" placeholder="https://medium.com/..."></div>
+                    <div class="seo-field"><label>Target page on your site</label><input name="targetPage" value="/" placeholder="/product/..."></div>
+                    <div class="seo-field"><label>Anchor text</label><input name="anchorText"></div>
+                    <div class="seo-field"><label>UTM source</label><input name="utmSource" placeholder="medium"></div>
+                    <div class="seo-field"><label>UTM campaign</label><input name="utmCampaign"></div>
+                    <div class="seo-field"><label>Status</label>
+                        <select name="status">
+                            <option value="draft">draft</option>
+                            <option value="published">published</option>
+                            <option value="monitoring">monitoring</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="seo-btn">Add campaign</button>
+            </form>
+            <% if (campaigns.length) { %>
+            <table class="seo-table">
+                <thead><tr><th>Platform</th><th>Title</th><th>Target</th><th>Status</th><th>Clicks</th><th></th></tr></thead>
+                <tbody>
+                <% campaigns.forEach(function (c) { %>
+                <tr>
+                    <td><%= c.platform %></td>
+                    <td><% if (c.externalUrl) { %><a href="<%= c.externalUrl %>" target="_blank"><%= c.title %></a><% } else { %><%= c.title %><% } %></td>
+                    <td><code><%= c.targetPage %></code></td>
+                    <td><span class="seo-badge <%= c.status === 'published' ? 'active' : 'pending' %>"><%= c.status %></span></td>
+                    <td><%= c.clickCount || 0 %></td>
+                    <td>
+                        <form method="POST" action="/admin/seo/parasite/delete/<%= c._id %>" style="display:inline" onsubmit="return confirm('Delete?')">
+                            <button type="submit" class="seo-btn danger" style="padding:4px 10px;font-size:11px">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                <% }); %>
+                </tbody>
+            </table>
+            <% } %>
+        </section>
+
+        <section id="backlinks" class="seo-panel">
+            <h2>Backlink manager</h2>
+            <form method="POST" action="/admin/seo/backlinks">
+                <div class="seo-grid">
+                    <div class="seo-field"><label>Partner / site name</label><input name="partnerName" required></div>
+                    <div class="seo-field"><label>Target URL</label><input name="targetUrl" required placeholder="https://partner.com"></div>
+                    <div class="seo-field"><label>Anchor text</label><input name="anchorText"></div>
+                    <div class="seo-field"><label>Link type</label>
+                        <select name="linkType">
+                            <option value="nofollow">nofollow</option>
+                            <option value="dofollow">dofollow</option>
+                            <option value="sponsored">sponsored</option>
+                        </select>
+                    </div>
+                    <div class="seo-field"><label>Direction</label>
+                        <select name="direction">
+                            <option value="outbound">outbound (you link to them)</option>
+                            <option value="inbound">inbound (they link to you)</option>
+                            <option value="mutual">mutual</option>
+                        </select>
+                    </div>
+                    <div class="seo-field"><label>Domain authority (0–100)</label><input type="number" name="domainAuthority" min="0" max="100" value="0"></div>
+                    <div class="seo-field"><label>Status</label>
+                        <select name="status">
+                            <option value="pending">pending</option>
+                            <option value="active">active</option>
+                            <option value="lost">lost</option>
+                        </select>
+                    </div>
+                    <div class="seo-field"><label><input type="checkbox" name="showOnFooter" value="1"> Show in footer</label></div>
+                    <div class="seo-field"><label><input type="checkbox" name="showOnResources" value="1" checked> Show on /resources</label></div>
+                    <div class="seo-field" style="grid-column: 1 / -1;"><label>Notes</label><textarea name="notes" rows="2"></textarea></div>
+                </div>
+                <button type="submit" class="seo-btn">Add backlink</button>
+            </form>
+
+            <% if (backlinks.length) { %>
+            <table class="seo-table" style="margin-top: 24px;">
+                <thead><tr><th>Partner</th><th>Type</th><th>Tracked URL</th><th>Clicks</th><th>Status</th><th></th></tr></thead>
+                <tbody>
+                <% backlinks.forEach(function (bl) { %>
+                <tr>
+                    <td><strong><%= bl.partnerName %></strong><br><small><%= bl.anchorText || bl.targetUrl %></small></td>
+                    <td><%= bl.direction %> / <%= bl.linkType %></td>
+                    <td><code>/out/<%= bl.slug %></code></td>
+                    <td><%= bl.clickCount || 0 %></td>
+                    <td><span class="seo-badge <%= bl.status %>"><%= bl.status %></span></td>
+                    <td>
+                        <form method="POST" action="/admin/seo/backlinks/delete/<%= bl._id %>" style="display:inline" onsubmit="return confirm('Delete backlink?')">
+                            <button type="submit" class="seo-btn danger" style="padding:4px 10px;font-size:11px">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                <% }); %>
+                </tbody>
+            </table>
+            <% } %>
+        </section>
+    </div>
+</body>
+</html>

@@ -1,0 +1,33 @@
+<% const canon = typeof seoCanonical !== 'undefined' ? seoCanonical : (seoBaseUrl || '') %>
+<% const ogImg = typeof seoOgImage !== 'undefined' ? seoOgImage : ((seoBaseUrl || '') + '/images/og-default.svg') %>
+<% const ogTypeVal = typeof seoOgType !== 'undefined' ? seoOgType : 'website' %>
+<link rel="canonical" href="<%= canon %>">
+<% if (siteSeo && siteSeo.googleSiteVerification) { %>
+<meta name="google-site-verification" content="<%= siteSeo.googleSiteVerification %>">
+<% } %>
+<% if (siteSeo && siteSeo.bingSiteVerification) { %>
+<meta name="msvalidate.01" content="<%= siteSeo.bingSiteVerification %>">
+<% } %>
+<% if (seoNoindex) { %>
+<meta name="robots" content="noindex, nofollow">
+<% } else { %>
+<meta name="robots" content="index, follow, max-image-preview:large">
+<% } %>
+<meta property="og:type" content="<%= ogTypeVal %>">
+<meta property="og:site_name" content="<%= siteSeo ? siteSeo.siteName : 'Be IT:Service' %>">
+<meta property="og:title" content="<%= seoTitle %>">
+<meta property="og:description" content="<%= seoDesc %>">
+<meta property="og:url" content="<%= canon %>">
+<meta property="og:image" content="<%= ogImg %>">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="<%= seoTitle %>">
+<meta name="twitter:description" content="<%= seoDesc %>">
+<meta name="twitter:image" content="<%= ogImg %>">
+<% if (siteSeo && siteSeo.twitterHandle) { %>
+<meta name="twitter:site" content="<%= siteSeo.twitterHandle %>">
+<% } %>
+<% if (seoJsonLd) {
+  const blocks = Array.isArray(seoJsonLd) ? seoJsonLd : [seoJsonLd];
+  blocks.forEach(function (block) { %>
+<script type="application/ld+json"><%- JSON.stringify(block) %></script>
+<% }); } %>
