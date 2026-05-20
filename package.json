@@ -5,6 +5,7 @@
     "main": "app.js",
     "scripts": {
         "start": "node app.js",
+        "build": "echo \"No build step\"",
         "dev": "nodemon app.js"
     },
     "dependencies": {
